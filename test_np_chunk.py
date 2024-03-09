@@ -13,8 +13,8 @@ def test_np_chunk():
     """
     tree = nltk.tree.Tree.fromstring(sentence)
     np_chunks = np_chunk(tree)
-    assert len(np_chunks) == 2
-    assert np_chunks[0].leaves() == ['the', 'armchair']
-    assert np_chunks[1].leaves() == ['the', 'home']
-
-
+    assert len(np_chunks) == 3
+    assert np_chunks[0].leaves() == ['he']
+    assert np_chunks[1].leaves() == ['the', 'armchair']
+    assert np_chunks[2].leaves() == ['the', 'home']
+ 

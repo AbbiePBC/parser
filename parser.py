@@ -24,12 +24,12 @@ S -> N V NP
 S -> N V NP P N
 S -> N V P Det Adj N Conj N V
 S -> NP V Adv Adj N
-S -> N V P N
+S -> N V P NP
 S -> N V Adv Conj V NP
 S -> N V P NP P NP
 S -> N Adv V Det N Conj N V P NP Adv
 S -> N V Det Adj N P NP Conj V N P Det Adj N
-S -> N V Dect Adj Adj Adj N N P Det N P Det NP
+S -> N V Det Adj Adj Adj N N P NP P NP
 NP -> N | Det N
 """
 
@@ -89,7 +89,7 @@ def preprocess(sentence: str) -> list[str]:
     words = [word for word in words if any(c.isalpha() for c in word)]
 
     return words
-
+    
 
 def np_chunk(tree: nltk.tree.Tree) -> list[nltk.tree.Tree]:
     """
@@ -100,12 +100,16 @@ def np_chunk(tree: nltk.tree.Tree) -> list[nltk.tree.Tree]:
     """
     noun_phrases = []
     for subtree in tree:
-        if subtree.label() == "NP":
-            if not any(subtree.label() == "NP" for subtree in subtree):
-                noun_phrases.append(subtree)
-            else:
-                noun_phrases.extend(np_chunk(subtree))
-        # else, we may need to check subtrees of the current subtree
+
+        if len(subtree.leaves())> 1:
+            if subtree.label() == "NP":
+                if not any(subtree.label() == "NP" for subtree in subtree):
+                    noun_phrases.append(subtree)
+                else:
+                    noun_phrases.extend(np_chunk(subtree))
+        elif subtree.label() == "N":
+            noun_phrases.append(subtree)
+            # else, we may need to check subtrees of the current subtree
         # TODO: {'holmes', 'the home'}
     return noun_phrases
 
