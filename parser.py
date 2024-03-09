@@ -1,6 +1,9 @@
 import nltk
 import sys
 
+
+# Context free grammar rules.
+
 TERMINALS = """
 Adj -> "country" | "dreadful" | "enigmatical" | "little" | "moist" | "red"
 Adv -> "down" | "here" | "never"
@@ -16,7 +19,20 @@ V -> "smiled" | "tell" | "were"
 
 NONTERMINALS = """
 S -> N V
+S -> N V NP
+S -> N V NP P N
+S -> N V P Det Adj N Conj N V
+S -> NP V Adv Adj N
+S -> N V P N
+S -> N V Adv Conj V NP
+S -> N V P NP P NP
+NP -> N | Det N
 """
+# Other sentences to test:
+# She never said a word until we were at the door here.
+# I had a country walk on Thursday and came home in a dreadful mess.
+# I had a little moist red paint in the palm of my hand.
+
 
 grammar = nltk.CFG.fromstring(NONTERMINALS + TERMINALS)
 parser = nltk.ChartParser(grammar)
@@ -55,25 +71,42 @@ def main():
             print(" ".join(np.flatten()))
 
 
-def preprocess(sentence):
+def preprocess(sentence: str) -> list[str]:
     """
     Convert `sentence` to a list of its words.
     Pre-process sentence by converting all characters to lowercase
     and removing any word that does not contain at least one alphabetic
     character.
     """
-    raise NotImplementedError
+
+    # Tokenize the sentence
+    words = nltk.word_tokenize(sentence)
+
+    # Convert to lowercase
+    words = [word.lower() for word in words]
+
+    # Remove any word that does not contain at least one alphabetic character
+    words = [word for word in words if any(c.isalpha() for c in word)]
+
+    return words
 
 
-def np_chunk(tree):
+def np_chunk(tree: nltk.tree.Tree) -> list[nltk.tree.Tree]:
     """
     Return a list of all noun phrase chunks in the sentence tree.
     A noun phrase chunk is defined as any subtree of the sentence
     whose label is "NP" that does not itself contain any other
     noun phrases as subtrees.
     """
-    raise NotImplementedError
-
+    noun_phrases = []
+    for subtree in tree:
+        if subtree.label() == "NP":
+            if not any(subtree.label() == "NP" for subtree in subtree):
+                noun_phrases.append(subtree)
+            else:
+                noun_phrases.extend(np_chunk(subtree))
+        # else, we may need to check subtrees of the current subtree
+    return noun_phrases
 
 if __name__ == "__main__":
     main()
