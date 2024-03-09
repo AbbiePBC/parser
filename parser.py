@@ -19,9 +19,11 @@ V -> "smiled" | "tell" | "were"
 
 # TODO: the following non terminals could be more succinct
 NONTERMINALS = """
-S -> N V
-S -> N V NP
+S -> NP V
+S -> NP V NP
+S -> NP P NP
 S -> N V NP P N
+S -> NP V Det Adj N
 S -> N V P Det Adj N Conj N V
 S -> NP V Adv Adj N
 S -> N V P NP
@@ -29,7 +31,7 @@ S -> N V Adv Conj V NP
 S -> N V P NP P NP
 S -> N Adv V Det N Conj N V P NP Adv
 S -> N V Det Adj N P NP Conj V N P Det Adj N
-S -> N V Det Adj Adj Adj N N P NP P NP
+S -> N V Det Adj Adj Adj N P Det N P NP
 NP -> N | Det N
 """
 
@@ -90,8 +92,7 @@ def preprocess(sentence: str) -> list[str]:
 
     return words
     
-
-def np_chunk(tree: nltk.tree.Tree) -> list[nltk.tree.Tree]:
+def np_chunk(input_tree: nltk.tree.Tree) -> list[nltk.tree.Tree]:
     """
     Return a list of all noun phrase chunks in the sentence tree.
     A noun phrase chunk is defined as any subtree of the sentence
@@ -99,19 +100,16 @@ def np_chunk(tree: nltk.tree.Tree) -> list[nltk.tree.Tree]:
     noun phrases as subtrees.
     """
     noun_phrases = []
-    for subtree in tree:
-
-        if len(subtree.leaves())> 1:
-            if subtree.label() == "NP":
-                if not any(subtree.label() == "NP" for subtree in subtree):
-                    noun_phrases.append(subtree)
-                else:
-                    noun_phrases.extend(np_chunk(subtree))
-        elif subtree.label() == "N":
-            noun_phrases.append(subtree)
-            # else, we may need to check subtrees of the current subtree
-        # TODO: {'holmes', 'the home'}
+    for tree in input_tree:
+        if tree.label() == "NP":
+            if not any(subtree.label() == "NP" for subtree in tree):
+                noun_phrases.append(tree)
+            else:
+                noun_phrases.extend(np_chunk(subtree) for subtree in tree)
+        elif tree.label() == "N":
+            noun_phrases.append(tree)
     return noun_phrases
+
 
 if __name__ == "__main__":
     main()

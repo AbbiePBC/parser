@@ -1,5 +1,4 @@
-import nltk
-from parser import np_chunk
+from parser import np_chunk, nltk
 
 def test_np_chunk():
 
