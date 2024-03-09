@@ -17,6 +17,7 @@ V -> "arrived" | "came" | "chuckled" | "had" | "lit" | "said" | "sat"
 V -> "smiled" | "tell" | "were"
 """
 
+# TODO: the following non terminals could be more succinct
 NONTERMINALS = """
 S -> N V
 S -> N V NP
@@ -26,12 +27,11 @@ S -> NP V Adv Adj N
 S -> N V P N
 S -> N V Adv Conj V NP
 S -> N V P NP P NP
+S -> N Adv V Det N Conj N V P NP Adv
+S -> N V Det Adj N P NP Conj V N P Det Adj N
+S -> N V Dect Adj Adj Adj N N P Det N P Det NP
 NP -> N | Det N
 """
-# Other sentences to test:
-# She never said a word until we were at the door here.
-# I had a country walk on Thursday and came home in a dreadful mess.
-# I had a little moist red paint in the palm of my hand.
 
 
 grammar = nltk.CFG.fromstring(NONTERMINALS + TERMINALS)
@@ -106,6 +106,7 @@ def np_chunk(tree: nltk.tree.Tree) -> list[nltk.tree.Tree]:
             else:
                 noun_phrases.extend(np_chunk(subtree))
         # else, we may need to check subtrees of the current subtree
+        # TODO: {'holmes', 'the home'}
     return noun_phrases
 
 if __name__ == "__main__":
